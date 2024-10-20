@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import Nav from "@/components/nav";
 
+
 export default function TranslatorPage() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
