@@ -206,7 +206,7 @@ export default function Component() {
               </Link>
               <Link
                 className="flex h-8 items-center gap-2 rounded-sm bg-[#24292e] px-3 text-xs text-white"
-                href="https://github.com/yourusername/your-repo"
+                href="https://github.com/fireflightg"
                 target="_blank"
               >
                 <svg
@@ -228,9 +228,9 @@ export default function Component() {
               Have questions or suggestions? Reach out to us at{" "}
               <Link
                 className="border-b border-foreground/50"
-                href="mailto:support@signlingo.com"
+                href="mailto:support@signara.com"
               >
-                support@signlingo.com
+                support@signara.com
               </Link>
               .
             </p>
