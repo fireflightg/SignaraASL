@@ -1,91 +1,193 @@
-import { Footer } from "@/components/footer";
-import { NavbarDemo } from "@/components/sidebaruser";
-import { useRouter } from "next/router";
-import { bouncy } from "ldrs";
-import { getQuote } from "inspirational-quotes";
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { v4 as uuidv4 } from "uuid";
-import firebase from "firebase/compat/app";
-import "firebase/compat/firestore";
 import Link from "next/link";
-import { AlertCircle, CircleUser, Menu, Package2, Search } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useUser } from "@clerk/clerk-react";
+import Webcam from "react-webcam";
 import { FilesetResolver, GestureRecognizer } from "@mediapipe/tasks-vision";
 import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
-
-import { GetLessons } from "@/hooks/getLessons";
 import { HAND_CONNECTIONS } from "@mediapipe/hands";
-import Webcam from "react-webcam";
-import { SignImageData } from "@/config/SignsData";
-import hand_landmarker_task from "@/public/model.task";
-
-import { Table } from "lucide-react";
-import ProgressBar from "@ramonak/react-progress-bar";
-import Image from "next/image";
-import { useHistory, useLocation } from "react-router-dom";
-import { useDetails, LessonDetails } from "@/hooks/details";
+import { getQuote } from "inspirational-quotes";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
 import toast, { Toaster } from "react-hot-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Hand, BookOpen, Users, Brain, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { NavbarDemo } from "@/components/sidebaruser";
+import { GetLessons } from "@/hooks/getLessons";
+import { useDetails } from "@/hooks/details";
+import dynamic from "next/dynamic";
+import Nav from "@/components/nav";
 
-import { useUser } from "@clerk/clerk-react";
+const DynamicBouncy = dynamic(
+  () => import("ldrs/bouncy").then((mod) => mod.bouncy),
+  {
+    ssr: false,
+  }
+);
 
-bouncy.register();
-
-// Default values shown
-
-const LessonPage = () => {
-  const { userData, error } = useDetails();
-  const details = userData;
-  const { isSignedIn, user, isLoaded } = useUser();
-  const [username, setUsername] = useState("");
-  // Initial state for username
+export default function LessonPage() {
+  const router = useRouter();
+  const { lessonNumber } = router.query;
+  const { isSignedIn, user } = useUser();
   const [lesson, setLesson] = useState(null);
-  const webcamRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [finishedless, setFinishedless] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [webcamRunning, setWebcamRunning] = useState(false);
   const [gestureOutput, setGestureOutput] = useState("");
   const [gestureRecognizer, setGestureRecognizer] = useState(null);
-  const [runningMode, setRunningMode] = useState("VIDEO");
   const [progress, setProgress] = useState(0);
-  const [detectedData, setDetectedData] = useState([]);
-  const [currentImage, setCurrentImage] = useState(null);
+  const [timer, setTimer] = useState(5);
+  const [countdown, setCountdown] = useState(3); // Countdown starts from 3
+  const [isCountingDown, setIsCountingDown] = useState(false);
+  const [score, setScore] = useState(0); // Score ranges from 0 to 5
+  const [isGestureCorrect, setIsGestureCorrect] = useState(false); // Added to track gesture correctness
+
+  const webcamRef = useRef(null);
+  const canvasRef = useRef(null);
   const requestRef = useRef();
 
+  const lessons = GetLessons();
+  const db = firebase.firestore();
+
   useEffect(() => {
-    let intervalId;
-    if (webcamRunning) {
-      intervalId = setInterval(() => {
-        const randomIndex = Math.floor(Math.random() * SignImageData.length);
-        setCurrentImage(SignImageData[randomIndex]);
-      }, 5000);
+    if (lessons.length > 0 && lessonNumber) {
+      const selectedLesson = lessons.find(
+        (lesson) => lesson.Number === Number(lessonNumber)
+      );
+      setLesson(selectedLesson);
     }
-    return () => clearInterval(intervalId);
-  }, [webcamRunning]);
+  }, [lessons, lessonNumber]);
+
+  const updateProgressInFirebase = async (sectionName, completed) => {
+    if (!user) return;
+
+    try {
+      const userDoc = await db.collection("users").doc(user.id).get();
+      let progressArray = [];
+      let completedArray = [];
+
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        progressArray = userData.InProgress || [];
+        completedArray = userData.Completed || [];
+      }
+
+      const existingProgressIndex = progressArray.findIndex(
+        (progress) =>
+          progress.lessonnum === lesson?.Number &&
+          progress.name.replace(" ✓", "") === sectionName
+      );
+
+      if (existingProgressIndex >= 0) {
+        progressArray[existingProgressIndex].finished = completed;
+        progressArray[existingProgressIndex].name = completed
+          ? sectionName + " ✓"
+          : sectionName;
+      } else {
+        progressArray.push({
+          name: completed ? sectionName + " ✓" : sectionName,
+          finished: completed,
+          lessonnum: lesson?.Number,
+        });
+      }
+
+      const allSectionsCompleted = lesson?.Sections.every((section) =>
+        progressArray.some(
+          (progress) =>
+            progress.name === section.name + " ✓" && progress.finished
+        )
+      );
+
+      if (allSectionsCompleted) {
+        if (!completedArray.includes(lesson?.name)) {
+          completedArray.push(lesson?.name);
+          toast.success(`Lesson "${lesson?.name}" completed!`);
+        }
+      }
+
+      await db.collection("users").doc(user.id).set(
+        {
+          InProgress: progressArray,
+          Completed: completedArray,
+        },
+        { merge: true }
+      );
+      console.log("Progress and completion updated successfully!");
+    } catch (error) {
+      console.error("Error updating progress:", error);
+      toast.error("Error updating progress: " + error.message);
+    }
+  };
+
+  const [userProgress, setUserProgress] = useState([]);
+
+  useEffect(() => {
+    if (user) {
+      const fetchUserProgress = async () => {
+        try {
+          const doc = await db.collection("users").doc(user.id).get();
+          if (doc.exists) {
+            const userData = doc.data();
+            setUserProgress(userData.InProgress || []);
+          }
+        } catch (error) {
+          console.error("Error fetching user progress:", error);
+        }
+      };
+
+      fetchUserProgress();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    async function loadGestureRecognizer() {
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
+      );
+      const recognizer = await GestureRecognizer.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: "/model.task", // Ensure this path is correct
+        },
+        numHands: 1,
+        runningMode: "VIDEO",
+      });
+      setGestureRecognizer(recognizer);
+      console.log("Gesture recognizer initialized");
+    }
+    loadGestureRecognizer();
+  }, []);
 
   const predictWebcam = useCallback(async () => {
-    if (!webcamRef.current || !gestureRecognizer) return;
+    if (!webcamRef.current || !gestureRecognizer) {
+      if (requestRef.current) {
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = null;
+      }
+      return;
+    }
+
+    if (isCountingDown) {
+      requestRef.current = requestAnimationFrame(predictWebcam);
+      return;
+    }
 
     const results = await gestureRecognizer.recognizeForVideo(
       webcamRef.current.video,
       Date.now()
     );
 
-    const canvasCtx = canvasRef.current.getContext("2d");
-    canvasCtx.save();
-    canvasCtx.clearRect(
-      0,
-      0,
-      canvasRef.current.width,
-      canvasRef.current.height
-    );
-
-    webcamRef.current.video.width = webcamRef.current.video.videoWidth;
-    webcamRef.current.video.height = webcamRef.current.video.videoHeight;
-
-    canvasRef.current.width = webcamRef.current.video.width;
-    canvasRef.current.height = webcamRef.current.video.height;
-
     if (results.landmarks) {
+      const canvasCtx = canvasRef.current.getContext("2d");
+      canvasCtx.save();
+      canvasCtx.clearRect(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
       results.landmarks.forEach((landmarks) => {
         drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {
           color: "#00FF00",
@@ -93,380 +195,267 @@ const LessonPage = () => {
         });
         drawLandmarks(canvasCtx, landmarks, { color: "#FF0000", lineWidth: 2 });
       });
+      canvasCtx.restore();
     }
 
     if (results.gestures.length > 0) {
       const gesture = results.gestures[0][0];
-      setGestureOutput(gesture.categoryName);
-      setProgress(Math.round(parseFloat(gesture.score) * 100));
+      const detectedGesture = gesture.categoryName.trim().toLowerCase();
+      const expectedGesture = lesson.Sections[currentIndex].word
+        .trim()
+        .toLowerCase();
+
+      console.log("Detected gesture:", detectedGesture);
+      console.log("Expected gesture:", expectedGesture);
+
+      if (detectedGesture === expectedGesture) {
+        if (score < 1) {
+          setScore((prevScore) =>
+            prevScore > 1 ? prevScore + 1 : prevScore * 0 + 1
+          );
+        } else {
+          setScore(1);
+        }
+        setIsGestureCorrect(true); // Set the correct gesture flag
+
+        const sectionName = lesson.Sections[currentIndex].name;
+
+        updateProgressInFirebase(sectionName, true);
+        toast.success("Great job! You've completed the section.");
+        setGestureOutput(""); // Reset the gesture output state
+      } else {
+        setIsGestureCorrect(false); // Gesture wasn't correct
+      }
     } else {
+      setIsGestureCorrect(false); // No gesture detected
       setGestureOutput("");
-      setProgress(0);
     }
 
     requestRef.current = requestAnimationFrame(predictWebcam);
-  }, [gestureRecognizer]);
-
-  useEffect(() => {
-    async function loadGestureRecognizer() {
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-      );
-      const recognizer = await GestureRecognizer.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: hand_landmarker_task,
-        },
-        numHands: 1,
-        runningMode: runningMode,
-      });
-      setGestureRecognizer(recognizer);
-    }
-    loadGestureRecognizer();
-  }, [runningMode]);
+  }, [
+    gestureRecognizer,
+    isCountingDown,
+    lesson?.Sections,
+    currentIndex,
+    score,
+    updateProgressInFirebase,
+  ]);
 
   const enableCam = useCallback(async () => {
     if (!gestureRecognizer) {
-      alert("Please wait for gestureRecognizer to load");
+      toast.error("Please wait for gesture recognizer to load");
       return;
     }
     if (webcamRunning) {
       cancelAnimationFrame(requestRef.current);
+      requestRef.current = null;
       setWebcamRunning(false);
-      setCurrentImage(null);
+      setIsCountingDown(false);
     } else {
       setWebcamRunning(true);
-      var startTime = new Date();
+      setIsCountingDown(true);
+      setCountdown(3);
       requestRef.current = requestAnimationFrame(predictWebcam);
     }
   }, [webcamRunning, gestureRecognizer, predictWebcam]);
 
-  //Import Lesson info
-
-  const router = useRouter();
-  const { lessonNumber } = router.query; // Capture the lesson number from the URL
-
-  //console.log("Current Lesson Number:", lessonNumber, typeof lessonNumber);
-
-  const lessons = GetLessons(); // Call the custom hook to fetch lessons
-
-  const [senddata, Setsenddata] = useState({});
   useEffect(() => {
-    if (lessons.length > 0 && lessonNumber) {
-      const selectedLesson = lessons.find(
-        (lesson) => lesson.Number === Number(lessonNumber)
-      );
-      var setm = {
-        lessonnumber: selectedLesson,
-
-        sections: {},
-      };
-
-      for (const j in lesson?.Sections) {
-        var loc = lesson?.Sections[j];
-        setm[loc.name] = false;
-      }
-      Setsenddata(setm);
-
-      setLesson(selectedLesson);
+    let countdownInterval;
+    if (isCountingDown && webcamRunning) {
+      countdownInterval = setInterval(() => {
+        setCountdown((prevCountdown) => {
+          if (prevCountdown <= 1) {
+            clearInterval(countdownInterval);
+            setIsCountingDown(false);
+            setCountdown(0);
+            return 0;
+          }
+          return prevCountdown - 1;
+        });
+      }, 1000);
     }
-  }, [lessons, lessonNumber]);
-
-  const [lessonpagenum, setlessonpage] = useState(0);
-
-  useEffect(() => {
-    const completedLessons = details?.InProgress?.reduce((acc, item) => {
-      if (item.lessonnum === lessonNumber) {
-        acc.push(item.name);
+    return () => {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
       }
-      return acc;
-    }, []);
-    console.log(details?.InProgress);
-
-    setFinishedless(details?.InProgress);
-    console.log("Completed Lessons:", completedLessons); // Debugging output
-  }, [details, lessonNumber]);
-
-  // const response = GetLessons();
-
-  // useEffect(() => {
-  //   async function loadLesson() {
-  //     if (!lesson) {
-  //       // Check if response and loc are valid
-  //       console.log("Loading lesson:", response);
-  //       setLesson(response);
-  //     }
-  //   }
-
-  //   loadLesson();
-  // }, [response]); // Ensure 'response' and 'loc' are stable
-
-  // useEffect(() => {
-  //     // Fetch the lesson details from an API or local data store
-  //     const fetchLesson = async () => {
-  //         const response = GetLessons();
-  //         //const response = await fetch(`/pages/lessons/${lessonNumber}`);
-  //        const data = response;
-  //         setLesson(data);
-  //     };
-
-  //     if (lessonNumber) {
-  //         fetchLesson();
-  //     }
-  // }, [lessonNumber]);
-  const [currentIndex, setIndex] = useState(0);
-  const [progressy, setProgressy] = useState(0);
-
-  const expectedGesture = lesson?.Sections[currentIndex]?.word;
-
-  const db = firebase.firestore();
-
-  const [completedSections, setCompletedSections] = useState({});
-
-  // Initialize the gesture recognizer and webcam
-  // Similar to your existing code...
-  const [timer, setTimer] = useState(5);
-
-  const handleGestureDetected = useCallback(
-    (gesture) => {
-      if (timer < 0) {
-        setTimer(0);
-      }
-
-      if (gesture === expectedGesture && timer <= 0) {
-        setProgressy((prev) => prev + 1);
-        setTimer(5);
-
-        if (progressy >= 4) {
-          // Assuming 5 correct gestures completes the section
-          const sectionName = lesson?.Sections[currentIndex]?.name;
-          setCompletedSections((prev) => ({ ...prev, [sectionName]: true }));
-          toast.success("Section completed!");
-
-          updateProgressInFirebase(sectionName, true);
-        }
-      } else {
-        setTimeout(() => {
-          setTimer((prev) => prev - 1);
-          console.log(timer);
-        }, 1000);
-      }
-    },
-    [expectedGesture, progressy, timer]
-  );
-
-  useEffect(() => {
-    if (gestureOutput) {
-      handleGestureDetected(gestureOutput);
-    }
-  }, [gestureOutput, handleGestureDetected]);
-
-  const updateProgressInFirebase = async (sectionName, completed) => {
-    if (!user) return;
-    try {
-      await db
-        .collection("users")
-        .doc(user.id)
-        .set(
-          {
-            InProgress: [
-              {
-                name: sectionName,
-                finished: completed,
-                lessonnum: lesson?.Number,
-              },
-            ],
-          },
-          { merge: true }
-        );
-      console.log("Progress updated successfully!");
-    } catch (error) {
-      console.error("Error updating progress:", error);
-      toast.error("Error updating progress: " + error.message);
-    }
-  };
+    };
+  }, [isCountingDown, webcamRunning]);
 
   if (!lesson) {
     return (
-      <>
-        <NavbarDemo />
-
-        <div className="  py-52 flex justify-center  align-middle text-center h-full gap-5 ">
-          <div>
-            <l-bouncy size="45" speed="1.75" color="black" />
-            <div class="text-center">
-              <p className="text-lg font-medium">
-                {'"'}
-                {getQuote().text} {'"'}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                - {getQuote().author}
-              </p>
+      <div className="min-h-screen flex flex-col">
+        <Nav />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <div className="mb-4">
+              <DynamicBouncy size={45} speed={1.75} color="black" />
             </div>
+            <p className="text-lg font-medium mb-2">
+              {'"'}
+              {getQuote().text}
+              {'"'}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              - {getQuote().author}
+            </p>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <NavbarDemo />
-      <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <ul class=" text-center flex flex-wrap text-sm font-medium text-center text-gray-500 dark:text-gray-400">
-          {[...new Array(lesson?.Sections?.length).fill(1)].map((_, index) => {
-            return (
-              <li class="me-2" key={index}>
-                <a
-                  onClick={() => setIndex(index)}
-                  className={
-                    index == currentIndex
-                      ? "inline-block px-4 py-3 m-5 text-white bg-blue-600 rounded-lg active"
-                      : "inline-block px-4 py-3 m-5 rounded-lg hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white"
-                  }
-                  aria-current="page"
-                >
-                  {finishedless?.every((item) => {
-                    item.name === lesson.Sections[index].name
-                      ? (lesson.Sections[index].name =
-                          lesson.Sections[index].name + " ✅")
-                      : "";
-                  })}
-                  {lesson.Sections[index].name}
-                  {console.log(finishedless)}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-        <div
-          className={`grid grid-cols-1 md:grid-cols-2 gap-8 
-            ${lesson?.Sections[currentIndex].isCamera ? "" : "hidden"}`}
-        >
-          <div>
-            <h1 className="text-3xl font-bold mb-4">
-              How to Sign{" "}
-              {lesson?.Sections[currentIndex].isLetter ? "the Letter" : ""}{" "}
-              {"'"}
-              {lesson?.Sections[currentIndex].word}
-              {"'"} in ASL
-            </h1>
-            <p className="text-gray-600 mb-6">
-              Follow these simple steps to sign{" "}
-              {lesson?.Sections[currentIndex].isLetter ? "the letter " : ""}
-              {"'"}
-              {lesson?.Sections[currentIndex].word}
-              {"'"} in American Sign Language:
-            </p>
-            <ol className="list-decimal pl-6 space-y-4">
-              {[
-                ...new Array(
-                  lesson?.Sections[currentIndex]?.directions.length
-                ).fill(1),
-              ].map((_, index) => {
-                return (
-                  <li key={index}>
-                    <h3 className="font-semibold mb-2">
-                      {lesson?.Sections[currentIndex]?.directions[index].title}
-                    </h3>
-                    <p>
-                      {lesson?.Sections[currentIndex]?.directions[index].desc}
-                    </p>
-                  </li>
-                );
-              })}
-            </ol>
-            <p className="text-gray-600 mt-4">
-              Use the camera to display your hand signing{" "}
-              {lesson?.Sections[currentIndex].isLetter ? "the letter" : ""}
-              {"'"}
-              {lesson?.Sections[currentIndex].word}
-              {"'"} in ASL.
-            </p>
+    <div className="flex flex-col min-h-screen bg-white">
+      <Nav />
+      <main className="flex-grow container mx-auto px-4 py-12 md:px-6">
+        <div className="max-w-4xl mx-auto">
+          <Badge variant="secondary" className="mb-4">
+            Lesson {lessonNumber}
+          </Badge>
+          <h1 className="text-4xl font-bold tracking-tighter mb-4">
+            {lesson?.title}
+          </h1>
+          <p className="text-xl text-muted-foreground mb-8">{lesson?.desc}</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {lesson?.Sections.map((section, index) => (
+              <Card
+                key={index}
+                className={index === currentIndex ? "border-primary" : ""}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <Hand className="mr-2 h-5 w-5" />
+                    {section.name}{" "}
+                    {userProgress.some(
+                      (progress) =>
+                        progress.name.replace(" ✓", "") === section.name &&
+                        progress.finished
+                    ) && "✓"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    onClick={() => {
+                      setCurrentIndex(index);
+                      if (index !== currentIndex) {
+                        setScore(0); // Reset the score only when switching sections
+                      }
+                    }}
+                    variant={index === currentIndex ? "default" : "outline"}
+                    className="w-full"
+                  >
+                    {index === currentIndex ? "Current" : "Start"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Try it Yourself</h2>
-
-            <div className="bg-gray-100 rounded-lg p-6 ">
-              <div className="relative p-4  w-full text-center">
-                {/*countdown > 0 && (
-                  <div className="text-6xl absolute bg-black top-0 left-0 w-full h-full flex items-center justify-center font-bold text-white opacity-20 z-50">
-                    {countdow}
-                  </div>
-                )*/}
-
-                <>
-                  <Webcam audio={false} ref={webcamRef} />
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold flex items-center">
+                <Hand className="mr-2 h-6 w-6" />
+                Practice Area
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="relative aspect-video h-fit">
+                  <Webcam
+                    audio={false}
+                    ref={webcamRef}
+                    className="rounded-xl w-full h-full object-cover"
+                  />
                   <canvas
                     ref={canvasRef}
-                    className="-z-10 absolute top-0 left-0 w-full h-auto"
+                    className="absolute inset-0 w-full h-fit rounded-xl"
                   />
-                </>
-              </div>
-
-              <div className=" bottom-0 left-0 w-full p-4 text-center">
-                <button
-                  className="px-6 py-2 text-lg font-semibold text-white bg-blue-500 rounded hover:bg-blue-700"
-                  onClick={enableCam}
-                >
-                  {webcamRunning ? "Stop" : "Start Lesson"}
-                </button>
-                <div>
-                  <p className=" text-4xl font-semibold w-full text-center text-md ">
-                    {/*!gestureOutput ? "No sign shown" : gestureOutput*/}
-                    {gestureOutput == lesson?.Sections[currentIndex].word ? (
-                      <span className=" text-green-400"> Great Job!! </span>
+                  {isCountingDown && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-xl">
+                      <p className="text-white text-6xl font-bold">
+                        {countdown}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">
+                      Sign {"'"}
+                      {lesson?.Sections[currentIndex].word}
+                      {"'"} in ASL
+                    </h2>
+                    <p className="text-lg mb-4">
+                      Follow the instructions and practice the sign. You need to
+                      perform it correctly once to complete this section.
+                    </p>
+                    <div className="bg-muted p-4 rounded-lg mb-4">
+                      <p className="text-xl font-semibold mb-2">
+                        {isGestureCorrect ? (
+                          <span className="text-green-600">Good Job!</span>
+                        ) : (
+                          <span className="text-yellow-600">Not Quite</span>
+                        )}
+                      </p>
+                      <p className="text-muted-foreground">
+                        Progress: {score} / 1
+                      </p>
+                    </div>
+                    <Progress
+                      value={(score / 1) * 100}
+                      className="w-full h-2"
+                    />
+                  </div>
+                  <Button
+                    onClick={enableCam}
+                    className="w-full mt-4 text-lg py-6"
+                    size="lg"
+                  >
+                    {webcamRunning ? (
+                      <>
+                        Stop Camera
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </>
                     ) : (
-                      <span className=" text-red-400"> Nothing Yet </span>
+                      <>
+                        Start Camera
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </>
                     )}
-                  </p>
-
-                  <p className="">
-                    Sign{" "}
-                    {lesson?.Sections[currentIndex].isLetter
-                      ? "the letter "
-                      : ""}
-                    {"'"}
-                    {lesson?.Sections[currentIndex].word}
-                    {"'"} 5 times to continue, You{"'"}ve signed it {progressy}{" "}
-                    times
-                  </p>
-                  {/*<ProgressBar completed={progress} bgColor="#00FF00" />*/}
+                  </Button>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {lesson?.Sections[currentIndex].isCamera && (
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold tracking-tighter">
+                How to Sign{" "}
+                {lesson.Sections[currentIndex].isLetter ? "the Letter" : ""}{" "}
+                {"'"}
+                {lesson.Sections[currentIndex].word}
+                {"'"} in ASL
+              </h2>
+              <ol className="list-decimal pl-6 space-y-4">
+                {lesson.Sections[currentIndex].directions.map(
+                  (direction, index) => (
+                    <li key={index}>
+                      <h3 className="text-xl font-semibold mb-2">
+                        {direction.title}
+                      </h3>
+                      <p className="text-lg text-muted-foreground">
+                        {direction.desc}
+                      </p>
+                    </li>
+                  )
+                )}
+              </ol>
             </div>
-
-            {/* <div className="signlang_imagelist-container">
-                  <h2 className="gradient__text">Image</h2>
-                  <div className="signlang_image-div">
-                    {currentImage ? (
-                      <Image src={currentImage.url} alt={`Image of sign ${currentImage.id}`} width={100} height={100} />
-                    ) : (
-                      <h3 className="gradient__text">Click on the Start Button <br /> to practice with Images</h3>
-                    )}
-                  </div>
-                </div> */}
-          </div>
-
-          <div className="flex gap-2">
-            {/* <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground">
-                      <span className="text-sm font-medium">1</span>
-                    </div>
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted cursor-pointer hover:bg-muted-foreground hover:text-muted-foreground">
-                      <span className="text-sm font-medium">2</span>
-                    </div>
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted cursor-pointer hover:bg-muted-foreground hover:text-muted-foreground">
-                      <span className="text-sm font-medium">3</span>
-                    </div> */}
-          </div>
+          )}
         </div>
-      </div>
-      <h1>{lesson.title}</h1>
-      <p>{lesson.desc}</p>
-      {/* Add more lesson details here */}
-      <Toaster position="bottom-center" reverseOrder={false} />;
-    </>
+      </main>
+      {score < 1 && <Toaster position="bottom-center" reverseOrder={false} />}
+    </div>
   );
-};
-
-export default LessonPage;
+}

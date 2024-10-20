@@ -1,18 +1,9 @@
-import Link from "next/link";
-import {
-  Activity,
-  ArrowUpRight,
-  CircleUser,
-  CreditCard,
-  DollarSign,
-  Menu,
-  Package2,
-  Search,
-  Users,
-} from "lucide-react";
+"use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,235 +13,242 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import { NavbarDemo } from "@/components/sidebaruser";
 import { Progress } from "@/components/ui/progress";
-import { Carousel, Cardy } from "@/components/ui/apple-cards-carousel";
-
-import Image from "next/image";
-import { AppleCardsCarouselDemo } from "./Applecard";
-import Footer16, { Footer } from "@/components/footer";
-import { useDetails } from "@/hooks/details";
+import { ArrowLeft, ArrowRight, Award, BookOpen } from "lucide-react";
 import { GetLessons } from "@/hooks/getLessons";
-import { Skeleton } from "@/components/ui/skeleton";
+import Nav from "@/components/nav";
+import { useDetails } from "@/hooks/details"; // Import your custom hook
 
 export default function Dashboard() {
-  var details = useDetails();
-  var LessonData = GetLessons();
+  const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
+  const router = useRouter();
+  const { userData, error } = useDetails(); // Get user data from the hook
+  const lessonData = GetLessons();
 
-  console.log("niger", details);
+  useEffect(() => {
+    console.log("User Data:", userData);
+    console.log("Lessons Data:", lessonData);
+  }, [userData, lessonData]);
+
+  // If no userData or lessons, return loading state
+  if (!userData || !lessonData.length) {
+    return <div>loading</div>;
+  }
+
+  // Helper function to calculate lesson progress based on user's completed sections and lesson sections
+  const calculateLessonProgress = (lesson) => {
+    const userProgress = userData.inProgress || [];
+
+    // Get the sections completed by the user for the current lesson
+    const completedSections = userProgress.filter(
+      (progress) => progress.lessonnum === lesson.Number && progress.finished
+    ).length;
+
+    // Get the total number of sections for the current lesson
+    const totalSections = lesson.Sections?.length || 1;
+
+    // Calculate the progress as a percentage
+    const progressPercentage = (completedSections / totalSections) * 100;
+
+    return progressPercentage;
+  };
+
+  // Prepare lessons data with progress information
+  const lessons = lessonData.map((lesson) => {
+    const progress = calculateLessonProgress(lesson);
+    console.log(`Progress for lesson ${lesson.name}: ${progress}%`); // Debugging
+    return {
+      id: lesson.Number,
+      title: lesson.name,
+      description: lesson.Desc,
+      progress, // Compute the progress based on user data and lesson sections
+      category: lesson.paramname,
+      imgUrl: lesson.imgurl,
+      cardImg: lesson.cardimg,
+    };
+  });
+
+  const totalProgress =
+    userData.completed.length > 0
+      ? (userData.completed.length / lessons.length) * 100
+      : 0;
+
+  const nextLesson = () => {
+    setCurrentLessonIndex((prevIndex) => (prevIndex + 1) % lessons.length);
+  };
+
+  const prevLesson = () => {
+    setCurrentLessonIndex(
+      (prevIndex) => (prevIndex - 1 + lessons.length) % lessons.length
+    );
+  };
+
+  const startLesson = (lessonId) => {
+    router.push(`/lesson/${lessonId}`);
+  };
+
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <NavbarDemo />
-
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <section>
-          <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-            <Card x-chunk="dashboard-01-chunk-0" className=" col-span-2">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Completed Lessons
-                </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {console.log("detailsz", details?.completed?.length - 1)}
-
-                  {LessonData?.length > details?.completed?.length - 1 ? (
-                    LessonData?.length - details?.completed?.length - 1
-                  ) : details ? (
-                    <div className="flex items-center space-x-4">
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-[250px]" />
-                        <Skeleton className="h-4 w-[200px]" />
-                      </div>
-                    </div>
-                  ) : (
-                    "ALL LESSONS FINISHED"
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {"only " + LessonData?.length + " more lessons to go"}
+    <div className="flex flex-col min-h-screen">
+      <Nav />
+      <main className="flex-1">
+        <section className="w-full pt-12 md:pt-24 lg:pt-32 border-y">
+          <div className="px-4 md:px-6 space-y-10 xl:space-y-16">
+            <div className="grid max-w-[1300px] mx-auto gap-4 px-4 sm:px-6 md:px-10 md:grid-cols-2 md:gap-16">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:leading-[1.1]">
+                  Your ASL Learning Journey
+                </h1>
+                <p className="mt-4 text-muted-foreground md:text-xl">
+                  Track your progress, access lessons, and achieve your language
+                  goals.
                 </p>
-              </CardContent>
-            </Card>
-            <Card x-chunk="dashboard-05-chunk-1" className="col-span-2">
-              <CardHeader className="pb-2">
-                <CardDescription>Current Lesson</CardDescription>
-                <CardTitle className="text-4xl">Alphabet</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xs text-muted-foreground">
-                  Part 3: The Letter J
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Progress value={0} aria-label="25% increase" />
-              </CardFooter>
-            </Card>
+              </div>
+              <div className="flex flex-col items-start space-y-4">
+                <Card className="w-full">
+                  <CardHeader>
+                    <CardTitle>Overall Completion</CardTitle>
+                    <CardDescription>
+                      Your journey through all ASL lessons
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Progress value={totalProgress} className="w-full" />
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {totalProgress.toFixed(0)}% Complete
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </section>
-        <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-          {/* 
-          <Card
-            className="xl:col-span-2" x-chunk="dashboard-01-chunk-4"
-          >
-            <CardHeader className="flex flex-row items-center">
-              <div className="grid gap-2">
-                <CardTitle>Transactions</CardTitle>
-                <CardDescription>
-                  Recent transactions from your store.
-                </CardDescription>
-              </div> */}
-          {/* <Button asChild size="sm" className="ml-auto gap-1">
-                <Link href="#">
-                  View All
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Customer</TableHead>
-                    <TableHead className="hidden xl:table-column">
-                      Type
-                    </TableHead>
-                    <TableHead className="hidden xl:table-column">
-                      Status
-                    </TableHead>
-                    <TableHead className="hidden xl:table-column">
-                      Date
-                    </TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                  </TableRow>
-                </TableHeader> */}
-          {/* <TableBody>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Liam Johnson</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        liam@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Sale
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-23
-                    </TableCell>
-                    <TableCell className="text-right">$250.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Olivia Smith</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        olivia@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Refund
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Declined
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-24
-                    </TableCell>
-                    <TableCell className="text-right">$150.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Noah Williams</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        noah@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Subscription
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-25
-                    </TableCell>
-                    <TableCell className="text-right">$350.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Emma Brown</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        emma@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Sale
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-26
-                    </TableCell>
-                    <TableCell className="text-right">$450.00</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Liam Johnson</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        liam@example.com
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      Sale
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">
-                      <Badge className="text-xs" variant="outline">
-                        Approved
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
-                      2023-06-27
-                    </TableCell>
-                    <TableCell className="text-right">$550.00</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card> */}
 
-          <Card className="col-span-2" x-chunk="dashboard-01-chunk-4">
-            <div className="w-full h-full py-20">
-              <h2 className="max-w-7xl pl-4 mx-auto text-xl md:text-5xl font-bold text-neutral-800 dark:text-neutral-200 font-sans">
-                Your Journey Starts Here.
-              </h2>
-              <AppleCardsCarouselDemo />
+        <section className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container space-y-12 px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                  Available Lessons
+                </h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Explore our curated lessons to enhance your ASL skills
+                </p>
+              </div>
             </div>
-          </Card>
+            <div className="mx-auto grid items-start gap-8 sm:max-w-4xl sm:grid-cols-2 md:gap-12 lg:max-w-5xl lg:grid-cols-3">
+              {lessons
+                .slice(currentLessonIndex, currentLessonIndex + 3)
+                .map((lesson) => (
+                  <Card key={lesson.id} className="flex flex-col h-full">
+                    <CardHeader>
+                      <CardTitle>{lesson.title}</CardTitle>
+                      <CardDescription>{lesson.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                      <div className="aspect-video relative mb-4">
+                        <Image
+                          src={lesson.cardImg}
+                          alt={`Image for ${lesson.title}`}
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-md"
+                        />
+                      </div>
+                      <Progress value={lesson.progress} className="w-full" />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {lesson.progress.toFixed(0)}% Complete
+                      </p>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                      <Button onClick={() => startLesson(lesson.id)}>
+                        {lesson.progress > 0 ? "Continue" : "Start"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => router.push(`/lesson/${lesson.id}`)}
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                        <span className="sr-only">Go to lesson</span>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+            </div>
+            <div className="flex justify-center space-x-4">
+              <Button variant="outline" size="icon" onClick={prevLesson}>
+                <ArrowLeft className="h-4 w-4" />
+                <span className="sr-only">Previous lessons</span>
+              </Button>
+              <Button variant="outline" size="icon" onClick={nextLesson}>
+                <ArrowRight className="h-4 w-4" />
+                <span className="sr-only">Next lessons</span>
+              </Button>
+            </div>
+          </div>
+        </section>
 
-          <Card x-chunk="dashboard-01-chunk-5">
-            <CardHeader>
-              <CardTitle>More News</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-8"></CardContent>
-          </Card>
-        </div>
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+          <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 lg:gap-10">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                Enhance Your Learning
+              </h2>
+              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Take your ASL skills to the next level with these additional
+                features
+              </p>
+            </div>
+            <div className="grid w-full grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-center space-x-2">
+                    <BookOpen className="h-6 w-6" />
+                    <span>Quick Practice</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Brush up on your skills with a quick session
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full" asChild>
+                    <Link href="/quick-practice">Start Quick Practice</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-center space-x-2">
+                    <Award className="h-6 w-6" />
+                    <span>Achievements</span>
+                  </CardTitle>
+                  <CardDescription>
+                    View your learning milestones
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full" variant="outline" asChild>
+                    <Link href="/achievements">View Achievements</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
       </main>
-      <Footer className="bg-muted" />
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+        <p className="text-xs text-muted-foreground">
+          © 2024 SignLingo. All rights reserved.
+        </p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <Link className="text-xs hover:underline underline-offset-4" href="#">
+            Terms of Service
+          </Link>
+          <Link className="text-xs hover:underline underline-offset-4" href="#">
+            Privacy
+          </Link>
+        </nav>
+      </footer>
     </div>
   );
 }

@@ -1,6 +1,4 @@
-import Link from "next/link";
-import { AlertCircle, CircleUser, Menu, Package2, Search } from "lucide-react";
-
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,16 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NavbarDemo } from "@/components/sidebaruser";
 import { Label } from "@/components/ui/label";
 import {
@@ -33,185 +22,130 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { GeneralSettings } from "./general";
-import { IntegrationsSettings } from "./integrations";
+import { Switch } from "@/components/ui/switch";
+import React, { useState } from "react";
+import Nav from "@/components/nav";
 
-export default function Dashboard() {
-  const router = useRouter();
+export default function Settings() {
   const [activePage, setActivePage] = useState("general");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [betaFeaturesEnabled, setBetaFeaturesEnabled] = useState(false);
 
   const menuItems = [
     { name: "General", slug: "general" },
     { name: "Security", slug: "security" },
     { name: "Integrations", slug: "integrations" },
-    { name: "Support", slug: "support" },
     { name: "Organizations", slug: "organizations" },
     { name: "Advanced", slug: "advanced" },
   ];
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleClearData = () => {
-    // Implement clear data logic here
     console.log("Clearing user data...");
     setIsDialogOpen(false);
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = (e) => {
     e.preventDefault();
-    // Implement password reset logic here
     console.log("Resetting password...");
   };
+
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <NavbarDemo />
-      <main className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
-        <div className="mx-auto grid w-full max-w-6xl gap-2">
-          <h1 className="text-3xl font-semibold">Settings</h1>
-        </div>
-        <div className="mx-auto grid w-full max-w-6xl items-start gap-6 md:grid-cols-[180px_1fr] lg:grid-cols-[250px_1fr]">
-          <nav
-            className="grid gap-4 text-sm text-muted-foreground"
-            x-chunk="dashboard-04-chunk-0"
-          >
-            {menuItems.map((item) => (
-              <Link
-                key={item.slug}
-                href={""}
-                className={`${
-                  activePage === item.slug ? "font-semibold text-primary" : ""
-                }`}
-                onClick={() => setActivePage(item.slug)}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-          <div className="grid gap-6">
-            {activePage === "general" && <GeneralSettings />}
-            {activePage === "security" && <SecuritySettings />}
-            {activePage === "integrations" && <IntegrationsSettings />}
-            {activePage === "support" && <SupportSettings />}
-            {activePage === "organizations" && <OrganizationsSettings />}
-            {activePage === "advanced" && <AdvancedSettings />}
+      <Nav />
+      <main className="flex-1 bg-background">
+        <section className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                  Settings
+                </h1>
+                <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  Customize your SignLingo experience and manage your account
+                  preferences.
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto mt-16 grid max-w-5xl items-start gap-8 sm:mt-20 md:grid-cols-[200px_1fr] lg:grid-cols-[250px_1fr]">
+              <nav className="flex flex-col space-y-4">
+                {menuItems.map((item) => (
+                  <Button
+                    key={item.slug}
+                    variant={activePage === item.slug ? "default" : "ghost"}
+                    className="justify-start"
+                    onClick={() => setActivePage(item.slug)}
+                  >
+                    {item.name}
+                  </Button>
+                ))}
+              </nav>
+              <div className="grid gap-8">
+                {activePage === "general" && <GeneralSettings />}
+                {activePage === "security" && <SecuritySettings />}
+                {activePage === "integrations" && <IntegrationsSettings />}
+                {activePage === "organizations" && <OrganizationsSettings />}
+                {activePage === "advanced" && <AdvancedSettings />}
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );
 
-  // function GeneralSettings() {
-  //   return (
-  //     <>
-  //       <Card x-chunk="dashboard-04-chunk-1">
-  //         <CardHeader>
-  //           <CardTitle>Username</CardTitle>
-  //           <CardDescription>
-  //             Your display name used for your account. This can be changed in
-  //             your profile.
-  //           </CardDescription>
-  //         </CardHeader>
-  //         <CardContent>
-  //           <form>
-  //             <Input placeholder="username" />
-  //           </form>
-  //         </CardContent>
-  //         <CardFooter className="border-t px-6 py-4">
-  //           <Button>Save</Button>
-  //         </CardFooter>
-  //       </Card>
-  //       <Card x-chunk="dashboard-04-chunk-2">
-  //         <CardHeader>
-  //           <CardTitle>Plugins Directory</CardTitle>
-  //           <CardDescription>
-  //             The directory within your project, in which your plugins are
-  //             located.
-  //           </CardDescription>
-  //         </CardHeader>
-  //         <CardContent>
-  //           <form className="flex flex-col gap-4">
-  //             <Input
-  //               placeholder="Project Name"
-  //               defaultValue="/content/plugins"
-  //             />
-  //             <div className="flex items-center space-x-2">
-  //               <Checkbox id="include" defaultChecked />
-  //               <label
-  //                 htmlFor="include"
-  //                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-  //               >
-  //                 Allow administrators to change the directory.
-  //               </label>
-  //             </div>
-  //           </form>
-  //         </CardContent>
-  //         <CardFooter className="border-t px-6 py-4">
-  //           <Button>Save</Button>
-  //         </CardFooter>
-  //       </Card>
-  //     </>
-  //   );
-  // }
-
-  function OrganizationsSettings() {
+  function GeneralSettings() {
     return (
       <>
         <Card>
           <CardHeader>
-            <CardTitle>Add Class Code</CardTitle>
-            <CardDescription>
-              Add to class/organizations for them to track updatea and
-              information
+            <CardTitle className="text-2xl font-bold">Username</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Your display name used for your account. This can be changed in
+              your profile.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Warning</AlertTitle>
-              <AlertDescription>
-                This will permanently and you to the class you will need to
-                reset your account to leave
-              </AlertDescription>
-            </Alert>
+            <form>
+              <Input placeholder="username" className="max-w-sm" />
+            </form>
           </CardContent>
-          <CardFooter>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <form onSubmit={saveUsername}>
-                <Input
-                  placeholder="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-
-                <CardFooter className="border-t px-6 py-4">
-                  <Button type="submit">Save</Button>
-                </CardFooter>
-              </form>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Are you absolutely sure?</DialogTitle>
-                  <DialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    your account and remove your data from our servers.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button variant="destructive" onClick={handleClearData}>
-                    Yes, clear all my data
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+          <CardFooter className="border-t px-6 py-4">
+            <Button>Save</Button>
+          </CardFooter>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">
+              Plugins Directory
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              The directory within your project, in which your plugins are
+              located.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="flex flex-col gap-4">
+              <Input
+                placeholder="Project Name"
+                defaultValue="/content/plugins"
+                className="max-w-sm"
+              />
+              <div className="flex items-center space-x-2">
+                <Checkbox id="include" />
+                <Label
+                  htmlFor="include"
+                  className="text-sm font-medium leading-none"
+                >
+                  Allow administrators to change the directory.
+                </Label>
+              </div>
+            </form>
+          </CardContent>
+          <CardFooter className="border-t px-6 py-4">
+            <Button>Save</Button>
           </CardFooter>
         </Card>
       </>
@@ -223,8 +157,10 @@ export default function Dashboard() {
       <>
         <Card>
           <CardHeader>
-            <CardTitle>Clear User Data</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold">
+              Clear User Data
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
               Permanently delete all your account data. This action cannot be
               undone.
             </CardDescription>
@@ -267,11 +203,10 @@ export default function Dashboard() {
             </Dialog>
           </CardFooter>
         </Card>
-
         <Card>
           <CardHeader>
-            <CardTitle>Reset Password</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Change your account password. We recommend using a strong, unique
               password.
             </CardDescription>
@@ -286,6 +221,7 @@ export default function Dashboard() {
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   required
+                  className="max-w-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -296,6 +232,7 @@ export default function Dashboard() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
+                  className="max-w-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -306,6 +243,7 @@ export default function Dashboard() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  className="max-w-sm"
                 />
               </div>
               <Button type="submit">Reset Password</Button>
@@ -313,6 +251,85 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </>
+    );
+  }
+
+  function IntegrationsSettings() {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Integrations</CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Manage your connected services and applications.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p>No integrations available at the moment.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  function OrganizationsSettings() {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Add Class Code</CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Add to class/organizations for them to track updates and information
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Warning</AlertTitle>
+            <AlertDescription>
+              This will permanently add you to the class. You will need to reset
+              your account to leave.
+            </AlertDescription>
+          </Alert>
+          <form className="mt-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="class-code">Class Code</Label>
+              <Input
+                id="class-code"
+                placeholder="Enter class code"
+                className="max-w-sm"
+              />
+            </div>
+            <Button type="submit">Join Class</Button>
+          </form>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  function AdvancedSettings() {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            Advanced Settings
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Configure advanced options for your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="beta-features"
+              checked={betaFeaturesEnabled}
+              onCheckedChange={setBetaFeaturesEnabled}
+            />
+            <Label htmlFor="beta-features">Enable Beta Features</Label>
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Turn on beta features to test new functionality before it{"'"}s
+            officially released.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 }

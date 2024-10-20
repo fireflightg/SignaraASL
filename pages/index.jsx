@@ -1,589 +1,243 @@
-import { NavbarDemo } from "@/components/sidebaruser";
-import { motion } from "framer-motion";
-import { Inter } from "next/font/google";
-
-import { BackgroundBeams } from "@/components/ui/background-beams";
-
-import { FlipWords } from "@/components/ui/flip-words";
-import dynamic from "next/dynamic";
-
-import { Footer } from "@/components/footer";
+import FooterASL from "@/components/footerasl";
+import Nav from "@/components/nav";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { HandMetal, ArrowDown, ExternalLink, User } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { FeatureCard } from "@/components/FeatureCard";
-import { TestimonialCard } from "@/components/Testimonials";
 
-const World = dynamic(
-  () => import("@/components/ui/globe").then((m) => m.World),
-  {
-    ssr: false,
-  }
-);
-
-const inter = Inter({ subsets: ["latin"] });
-
-export default function Home() {
-  const globeConfig = {
-    pointSize: 4,
-    globeColor: "#062056",
-    showAtmosphere: true,
-    atmosphereColor: "#FFFFFF",
-    atmosphereAltitude: 0.1,
-    emissive: "#062056",
-    emissiveIntensity: 0.1,
-    shininess: 0.9,
-    polygonColor: "rgba(255,255,255,0.7)",
-    ambientLight: "#38bdf8",
-    directionalLeftLight: "#ffffff",
-    directionalTopLight: "#ffffff",
-    pointLight: "#ffffff",
-    arcTime: 1000,
-    arcLength: 0.9,
-    rings: 1,
-    maxRings: 3,
-    initialPosition: { lat: 22.3193, lng: 114.1694 },
-    autoRotate: true,
-    autoRotateSpeed: 0.5,
-  };
-  const colors = ["#06b6d4", "#3b82f6", "#6366f1"];
-  const sampleArcs = [
-    {
-      order: 1,
-      startLat: -19.885592,
-      startLng: -43.951191,
-      endLat: -22.9068,
-      endLng: -43.1729,
-      arcAlt: 0.1,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 1,
-      startLat: 28.6139,
-      startLng: 77.209,
-      endLat: 3.139,
-      endLng: 101.6869,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 1,
-      startLat: -19.885592,
-      startLng: -43.951191,
-      endLat: -1.303396,
-      endLng: 36.852443,
-      arcAlt: 0.5,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 2,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: 35.6762,
-      endLng: 139.6503,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 2,
-      startLat: 51.5072,
-      startLng: -0.1276,
-      endLat: 3.139,
-      endLng: 101.6869,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 2,
-      startLat: -15.785493,
-      startLng: -47.909029,
-      endLat: 36.162809,
-      endLng: -115.119411,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 3,
-      startLat: -33.8688,
-      startLng: 151.2093,
-      endLat: 22.3193,
-      endLng: 114.1694,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 3,
-      startLat: 21.3099,
-      startLng: -157.8581,
-      endLat: 40.7128,
-      endLng: -74.006,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 3,
-      startLat: -6.2088,
-      startLng: 106.8456,
-      endLat: 51.5072,
-      endLng: -0.1276,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 4,
-      startLat: 11.986597,
-      startLng: 8.571831,
-      endLat: -15.595412,
-      endLng: -56.05918,
-      arcAlt: 0.5,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 4,
-      startLat: -34.6037,
-      startLng: -58.3816,
-      endLat: 22.3193,
-      endLng: 114.1694,
-      arcAlt: 0.7,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 4,
-      startLat: 51.5072,
-      startLng: -0.1276,
-      endLat: 48.8566,
-      endLng: -2.3522,
-      arcAlt: 0.1,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 5,
-      startLat: 14.5995,
-      startLng: 120.9842,
-      endLat: 51.5072,
-      endLng: -0.1276,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 5,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: -33.8688,
-      endLng: 151.2093,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 5,
-      startLat: 34.0522,
-      startLng: -118.2437,
-      endLat: 48.8566,
-      endLng: -2.3522,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 6,
-      startLat: -15.432563,
-      startLng: 28.315853,
-      endLat: 1.094136,
-      endLng: -63.34546,
-      arcAlt: 0.7,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 6,
-      startLat: 37.5665,
-      startLng: 126.978,
-      endLat: 35.6762,
-      endLng: 139.6503,
-      arcAlt: 0.1,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 6,
-      startLat: 22.3193,
-      startLng: 114.1694,
-      endLat: 51.5072,
-      endLng: -0.1276,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 7,
-      startLat: -19.885592,
-      startLng: -43.951191,
-      endLat: -15.595412,
-      endLng: -56.05918,
-      arcAlt: 0.1,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 7,
-      startLat: 48.8566,
-      startLng: -2.3522,
-      endLat: 52.52,
-      endLng: 13.405,
-      arcAlt: 0.1,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 7,
-      startLat: 52.52,
-      startLng: 13.405,
-      endLat: 34.0522,
-      endLng: -118.2437,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 8,
-      startLat: -8.833221,
-      startLng: 13.264837,
-      endLat: -33.936138,
-      endLng: 18.436529,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 8,
-      startLat: 49.2827,
-      startLng: -123.1207,
-      endLat: 52.3676,
-      endLng: 4.9041,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 8,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: 40.7128,
-      endLng: -74.006,
-      arcAlt: 0.5,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 9,
-      startLat: 51.5072,
-      startLng: -0.1276,
-      endLat: 34.0522,
-      endLng: -118.2437,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 9,
-      startLat: 22.3193,
-      startLng: 114.1694,
-      endLat: -22.9068,
-      endLng: -43.1729,
-      arcAlt: 0.7,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 9,
-      startLat: 1.3521,
-      startLng: 103.8198,
-      endLat: -34.6037,
-      endLng: -58.3816,
-      arcAlt: 0.5,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 10,
-      startLat: -22.9068,
-      startLng: -43.1729,
-      endLat: 28.6139,
-      endLng: 77.209,
-      arcAlt: 0.7,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 10,
-      startLat: 34.0522,
-      startLng: -118.2437,
-      endLat: 31.2304,
-      endLng: 121.4737,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 10,
-      startLat: -6.2088,
-      startLng: 106.8456,
-      endLat: 52.3676,
-      endLng: 4.9041,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 11,
-      startLat: 41.9028,
-      startLng: 12.4964,
-      endLat: 34.0522,
-      endLng: -118.2437,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 11,
-      startLat: -6.2088,
-      startLng: 106.8456,
-      endLat: 31.2304,
-      endLng: 121.4737,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 11,
-      startLat: 22.3193,
-      startLng: 114.1694,
-      endLat: 1.3521,
-      endLng: 103.8198,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 12,
-      startLat: 34.0522,
-      startLng: -118.2437,
-      endLat: 37.7749,
-      endLng: -122.4194,
-      arcAlt: 0.1,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 12,
-      startLat: 35.6762,
-      startLng: 139.6503,
-      endLat: 22.3193,
-      endLng: 114.1694,
-      arcAlt: 0.2,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 12,
-      startLat: 22.3193,
-      startLng: 114.1694,
-      endLat: 34.0522,
-      endLng: -118.2437,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 13,
-      startLat: 52.52,
-      startLng: 13.405,
-      endLat: 22.3193,
-      endLng: 114.1694,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 13,
-      startLat: 11.986597,
-      startLng: 8.571831,
-      endLat: 35.6762,
-      endLng: 139.6503,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 13,
-      startLat: -22.9068,
-      startLng: -43.1729,
-      endLat: -34.6037,
-      endLng: -58.3816,
-      arcAlt: 0.1,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-    {
-      order: 14,
-      startLat: -33.936138,
-      startLng: 18.436529,
-      endLat: 21.395643,
-      endLng: 39.883798,
-      arcAlt: 0.3,
-      color: colors[Math.floor(Math.random() * (colors.length - 1))],
-    },
-  ];
-
-  const words = [
-    "Actors",
-    "Families",
-    "Lawyers",
-    "Doctors",
-    "Teachers",
-    "Students",
-    "Politicians",
-    "Artists",
-    "Scientists",
-    "Engineers",
-    "Nurses",
-    "Entrepreneurs",
-    "Volunteers",
-  ];
-
+export default function Component() {
   return (
     <>
-      <NavbarDemo className=" bg-neutral-950" />
-      <div>
-        <div className=" min-h-screen  overscroll-none">
-          <div className=" overscroll-none pb-12 pt-32 md:pb-20 md:pt-40 grid grid-cols-1 md:grid-cols-3 gap-2">
-            <span></span>
-            <motion.div
-              initial={{ opacity: 0.0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.3,
-                duration: 0.8,
-                ease: "easeInOut",
-              }}
-              className="overscroll-contain  w-full h-full relative flex flex-col gap-4 items-center justify-center px-4"
+      <Nav />
+
+      <main className="container flex max-w-screen-md flex-col items-center px-5">
+        <section className="space-y-6 pb-48 pt-12 lg:py-32">
+          <div className="flex w-full max-w-[64rem] flex-col items-center gap-4 text-center">
+            <Link
+              href="#"
+              className="rounded-2xl bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground"
             >
-              <div className="text-3xl md:text-7xl font-bold text-neutral-950 text-center">
-                Discover <br /> How Sign Language Unites{" "}
-                <span className=" text-center">
-                  {" "}
-                  <FlipWords words={words} className=" text-center" />{" "}
-                </span>
-              </div>
+              Learn ASL Today
+            </Link>
 
-              <div className="font-extralight  text-center text-base md:text-4xl text-neutral-400 py-4">
-                Learn signing in real time with your hands.
-              </div>
+            <h1 className="font-heading max-w-md text-3xl sm:text-4xl">
+              Master American Sign Language with Real-Time Feedback
+            </h1>
 
+            <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8">
+              Learn ASL at your own pace using your camera. Get instant
+              feedback, track your progress, and connect with a community of
+              learners.
+            </p>
+
+            <div className="mt-3 flex space-x-4">
               <Link
-                href="/dashboard"
-                className=" bg-neutral-950 rounded-full w-fit text-white px-4 py-2 "
+                href="/sign-up"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
               >
                 Get Started
               </Link>
-            </motion.div>
-
-            <span></span>
-            {/* <World className="" data={sampleArcs} globeConfig={globeConfig} /> */}
+              <Link
+                href="/about"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+              >
+                Learn More
+              </Link>
+            </div>
           </div>
-          <BackgroundBeams className="fixed inset-0 -z-10" />
+        </section>
+
+        <div className="mb-20 grid grid-cols-2 gap-4 text-black">
+          <h3 className="col-span-2 flex items-center justify-center text-xl font-medium text-primary">
+            <ArrowDown className="text-primary/60" />
+            <span className="ml-1">ASL Impact</span>
+            <ArrowDown className="text-primary/80" />
+          </h3>
+
+          <div className="flex flex-col items-center space-y-1 rounded-md border-2 border-primary/20 bg-primary/10 px-8 py-3">
+            <User className="h-8 w-8 text-primary" />
+            <p className="text-xs">Deaf Population in US</p>
+            <p>~1 million</p>
+          </div>
+          <div className="flex flex-col items-center space-y-1 rounded-md border-2 border-primary/20 bg-primary/10 px-8 py-3">
+            <HandMetal className="h-8 w-8 text-primary" />
+            <p className="text-xs">ASL Users</p>
+            <p>~500,000</p>
+          </div>
+          <div className="col-span-2 flex flex-col items-center space-y-1 rounded-md border-2 border-primary/20 bg-primary/10 px-8 py-3">
+            <p className="text-sm">
+              Approximately 1 in 20 Americans are deaf or hard of hearing.
+              Learning ASL can bridge communication gaps and create a more
+              inclusive society.
+            </p>
+          </div>
         </div>
 
-        {/* Features Section */}
-        <section className="min-h-screen flex items-center z-10 bg-slate-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              Key Features
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <FeatureCard
-                title="Real-time Learning"
-                description="Practice sign language with instant feedback using advanced hand-tracking technology."
-                icon="🖐️"
+        {/* <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+          <div className="container px-4 md:px-6">
+            <div className="grid items-center gap-6 lg:grid-cols-[1fr_500px] lg:gap-12 xl:grid-cols-[1fr_550px]">
+              <Image
+                src="/placeholder.svg?height=310&width=550"
+                width={550}
+                height={310}
+                alt="ASL Learning Platform"
+                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
               />
-              <FeatureCard
-                title="Diverse Vocabulary"
-                description="Learn signs for various professions, emotions, and everyday objects."
-                icon="📚"
-              />
-              <FeatureCard
-                title="Interactive Lessons"
-                description="Engage with fun, interactive lessons designed to accelerate your learning."
-                icon="🎓"
-              />
+              <div className="flex flex-col justify-center space-y-4">
+                <div className="space-y-2">
+                  <div className="inline-block rounded-lg bg-primary px-3 py-1 text-sm text-primary-foreground">
+                    Interactive Learning
+                  </div>
+                  <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                    Learn ASL in Real-Time
+                  </h2>
+                  <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    Our cutting-edge platform uses your camera to provide
+                    instant feedback on your signing. Practice with AI-powered
+                    lessons tailored to your skill level.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                  <Button asChild>
+                    <Link href="/lessons">Start Learning</Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/how-it-works">How It Works</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section> */}
+
+        <section className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6 lg:gap-10">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                Why Learn ASL?
+              </h2>
+              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                ASL is not just for the deaf community. It{"'"}s a valuable
+                skill for everyone.
+              </p>
+            </div>
+            <div className="grid w-full grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="flex flex-col items-center space-y-2 border-2 border-primary/20 rounded-lg p-4">
+                <User className="h-12 w-12 text-primary" />
+                <h3 className="text-xl font-bold">Inclusivity</h3>
+                <p className="text-sm text-muted-foreground">
+                  Bridge communication gaps and create a more inclusive society.
+                </p>
+              </div>
+              <div className="flex flex-col items-center space-y-2 border-2 border-primary/20 rounded-lg p-4">
+                <HandMetal className="h-12 w-12 text-primary" />
+                <h3 className="text-xl font-bold">Cognitive Benefits</h3>
+                <p className="text-sm text-muted-foreground">
+                  Enhance your cognitive skills and brain plasticity.
+                </p>
+              </div>
+              <div className="flex flex-col items-center space-y-2 border-2 border-primary/20 rounded-lg p-4">
+                <ExternalLink className="h-12 w-12 text-primary" />
+                <h3 className="text-xl font-bold">Career Opportunities</h3>
+                <p className="text-sm text-muted-foreground">
+                  Open up new career paths in interpretation and education.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section className="min-h-screen flex items-center bg-white">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              How It Works
-            </h2>
-            <div className="max-w-3xl mx-auto">
-              <ol className="space-y-8">
-                <StepItem
-                  number={1}
-                  title="Sign Up"
-                  description="Create your account and set your learning goals."
-                />
-                <StepItem
-                  number={2}
-                  title="Choose Your Lessons"
-                  description="Select from a variety of lessons tailored to your interests and skill level."
-                />
-                <StepItem
-                  number={3}
-                  title="Practice with AI"
-                  description="Use our AI-powered system to practice signs and receive instant feedback."
-                />
-                <StepItem
-                  number={4}
-                  title="Track Your Progress"
-                  description="Monitor your improvement and earn achievements as you learn."
-                />
-              </ol>
+        {/* <section className="w-full py-12 md:py-24 lg:py-32 border-t">
+          <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+                Start Your ASL Journey Today
+              </h2>
+              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Join thousands of learners and become fluent in ASL. Sign up now
+                for a free trial.
+              </p>
+            </div>
+            <div className="mx-auto w-full max-w-sm space-y-2">
+              <form className="flex flex-col gap-2">
+                <Input type="email" placeholder="Enter your email" />
+                <Button type="submit">Get Started</Button>
+              </form>
+              <p className="text-xs text-muted-foreground">
+                By signing up, you agree to our{" "}
+                <Link href="/terms" className="underline underline-offset-2">
+                  Terms & Conditions
+                </Link>
+              </p>
             </div>
           </div>
-        </section>
-
-        {/* Testimonial Section */}
-        <section className="min-h-screen flex items-center bg-slate-950 text-white">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              What Our Users Say
+        </section> */}
+        <section id="open-source" className="container py-8 md:py-12 lg:py-24">
+          <div className="mx-auto flex max-w-[58rem] flex-col items-center justify-center gap-4 text-center">
+            <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl">
+              Powered by Open Source
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              <TestimonialCard
-                quote="This platform has revolutionized how I communicate with my deaf colleagues. It's intuitive and effective!"
-                author="Sarah J., Teacher"
-              />
-              <TestimonialCard
-                quote="As a doctor, learning sign language has helped me provide better care to all my patients. This tool made it possible."
-                author="Dr. Michael L., Pediatrician"
-              />
+            <p className="max-w-[85%] text-sm leading-normal text-muted-foreground">
+              SignLingo is built on open-source technologies and is itself open
+              source.
+              <br />
+              Check out our{" "}
+              <Link
+                href="https://github.com/yourusername/your-repo"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4"
+              >
+                GitHub repository
+              </Link>
+              .
+            </p>
+
+            <div className="mt-4 flex gap-2 ">
+              <Link href="https://vercel.com" target="_blank">
+                <Image
+                  src="/vercel.svg"
+                  alt="Powered by Vercel"
+                  height={24}
+                  width={120}
+                  className=" p-2"
+                />
+              </Link>
+              <Link
+                className="flex h-8 items-center gap-2 rounded-sm bg-[#24292e] px-3 text-xs text-white"
+                href="https://github.com/yourusername/your-repo"
+                target="_blank"
+              >
+                <svg
+                  height="20"
+                  aria-hidden="true"
+                  viewBox="0 0 16 16"
+                  version="1.1"
+                  width="20"
+                  data-view-component="true"
+                  className="octicon octicon-mark-github v-align-middle color-fg-default"
+                >
+                  <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+                </svg>
+                <span>View on GitHub</span>
+              </Link>
             </div>
+
+            <p className="mt-4 text-xs text-muted-foreground">
+              Have questions or suggestions? Reach out to us at{" "}
+              <Link
+                className="border-b border-foreground/50"
+                href="mailto:support@signlingo.com"
+              >
+                support@signlingo.com
+              </Link>
+              .
+            </p>
           </div>
         </section>
-      </div>
-
-      <Footer />
+      </main>
+      <FooterASL />
     </>
   );
-
-  function FeatureCard({ title, description, icon }) {
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-        <div className="text-4xl mb-4">{icon}</div>
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-slate-600">{description}</p>
-      </div>
-    );
-  }
-
-  function TestimonialCard({ quote, author }) {
-    return (
-      <div className="bg-slate-900 p-6 rounded-lg">
-        <p className="text-lg mb-4">
-          {'"'}
-          {quote}
-          {'"'}
-        </p>
-        <p className="text-slate-400 font-semibold">- {author}</p>
-      </div>
-    );
-  }
-
-  function StepItem({ number, title, description }) {
-    return (
-      <li className="flex items-start">
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-950 text-white flex items-center justify-center font-bold mr-4">
-          {number}
-        </div>
-        <div>
-          <h3 className="text-xl font-semibold mb-2">{title}</h3>
-          <p className="text-slate-600">{description}</p>
-        </div>
-      </li>
-    );
-  }
 }
