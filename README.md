@@ -1,40 +1,114 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Signara - American Sign Language Learning App
 
-## Getting Started
+Welcome to **Signara**, an AI-powered American Sign Language (ASL) learning app designed to make ASL accessible, easy, and free to learn. With real-time sign detection and personalized lessons, Signara is committed to bridging communication gaps and empowering users to learn ASL independently.
 
-First, run the development server:
+**Hosted Test Version**: [Signara Test Version](https://signara-asl-puiz.vercel.app/)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Table of Contents
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+1. [About the Project](#about-the-project)
+2. [Features](#features)
+3. [Getting Started](#getting-started)
+4. [Installation](#installation)
+5. [Usage](#usage)
+6. [Contributing](#contributing)
+7. [License](#license)
+8. [Contact](#contact)
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+---
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+### About the Project
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Signara is a web application that uses AI and machine learning to recognize and confirm ASL signs in real-time. Working closely with Ohio School for the Deaf and other organizations, Signara provides structured lessons and exercises that help users master sign language at their own pace.
 
-## Learn More
+Our mission is to make ASL learning accessible and free, offering an alternative to expensive sign language classes and reducing the barrier to entry for those interested in learning ASL.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- **Real-time Sign Detection**: Uses machine learning models to detect and recognize ASL signs through your device's camera.
+- **Structured Lessons**: A series of ASL lessons curated for beginners, with support for real-time confirmation of signs.
+- **Progress Tracking**: Automatically saves user progress, marking completed lessons with a ✓.
+- **User-Friendly Interface**: Simple and intuitive interface optimized for a smooth learning experience.
+- **Free and Accessible**: A completely free-to-use resource with DIY lessons, eliminating the need for a live instructor.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Getting Started
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+To get started with Signara:
+
+1. Clone the repository.
+2. Install dependencies.
+3. Launch the app on your local machine or deploy it to a web hosting service.
+
+> **Requirements**: 
+> - Node.js (>=14.x)
+> - NPM or Yarn
+> - Modern web browser (Chrome, Firefox, etc.)
+
+---
+
+### Installation
+
+To install and run Signara locally:
+
+1. **Clone the repo**:
+   ```bash
+   git clone https://github.com/your-username/signara.git
+   cd signara
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
+
+4. **Open Signara**:
+   Open your browser and navigate to `http://localhost:3000` to start learning!
+
+---
+
+### Usage
+
+1. **Select a Lesson**: Choose from various ASL lessons tailored to help you learn the basics.
+2. **Use Real-Time Detection**: Follow the instructions for each sign, positioning your hand within the camera's view. Signara will confirm recognition once the sign is detected.
+3. **Track Progress**: Completed lessons and sections will be marked with a ✓ to help you monitor your learning journey.
+
+---
+
+### Contributing
+
+We welcome contributions from the community! Please follow these steps to contribute:
+
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/YourFeature`).
+3. Commit your changes (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature/YourFeature`).
+5. Open a pull request.
+
+---
+
+### License
+
+Distributed under the GNU General Public License. See `LICENSE` for more information.
+
+---
+
+### Contact
+
+- **Saahib Mohammed** - Developer of Signara  
+  - Email: [roboticssaahib@gmail.com](mailto:roboticssaahib@gmail.com)  
+  - LinkedIn: [linkedin.com/in/saahib](https://www.linkedin.com/in/saahib/)
+
+---
+
+Thank you for exploring Signara! We hope it enhances your ASL learning experience and helps make ASL more accessible for everyone.
