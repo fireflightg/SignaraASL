@@ -16,7 +16,7 @@ import { HandMetal } from "lucide-react";
 import Nav from "@/components/nav";
 import FooterASL from "@/components/footerasl";
 
-// Make sure to replace with your actual Stripe publishable key
+// Make sure to replace with your actual Stripe publishable ke
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );

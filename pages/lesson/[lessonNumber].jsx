@@ -40,7 +40,7 @@ export default function LessonPage() {
   const [gestureRecognizer, setGestureRecognizer] = useState(null);
   const [progress, setProgress] = useState(0);
   const [timer, setTimer] = useState(5);
-  const [countdown, setCountdown] = useState(3); // Countdown starts from 3
+  const [countdown, setCountdown] = useState(3); // Countdown starts from
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [score, setScore] = useState(0); // Score ranges from 0 to 5
   const [isGestureCorrect, setIsGestureCorrect] = useState(false); // Added to track gesture correctness

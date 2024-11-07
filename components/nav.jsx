@@ -83,6 +83,9 @@ export default function Nav() {
               </PopoverTrigger>
               <PopoverContent className="p-4 space-y-4 w-64">
                 <SignedIn>
+                  <p className=" align-middle text-center">
+                    Welcome back {details?.username}
+                  </p>
                   <Button
                     onClick={() => signOut()}
                     variant="outline"
@@ -159,6 +162,28 @@ export default function Nav() {
                   {item.label}
                 </Link>
               ))}
+              <SignedIn>
+                <p className=" align-middle text-center">
+                  Welcome back {details?.username}
+                </p>
+                <Button
+                  onClick={() => signOut()}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Sign Out
+                </Button>
+              </SignedIn>
+              <SignedOut>
+                <div className="flex flex-col space-y-2">
+                  <Button asChild className="w-full">
+                    <Link href="/sign-in">Sign In</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/sign-up">Sign Up</Link>
+                  </Button>
+                </div>
+              </SignedOut>
               <Card className="w-full max-w-sm mt-8">
                 <CardHeader className="p-4">
                   <CardTitle>Upgrade to Pro</CardTitle>

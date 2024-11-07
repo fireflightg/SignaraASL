@@ -49,7 +49,7 @@ export default function Settings() {
 
   const handleResetPassword = (e) => {
     e.preventDefault();
-    console.log("Resetting password...");
+    console.log("Resetting password..");
   };
 
   return (

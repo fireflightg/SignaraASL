@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { getQuote } from "inspirational-quotes";
 import {
   Card,
   CardContent,
@@ -32,7 +33,27 @@ export default function Dashboard() {
 
   // If no userData or lessons, return loading state
   if (!userData || !lessonData.length) {
-    return <div>loading</div>;
+    return (
+      <>
+        <div className="flex flex-col h-screen justify-center items-center space-y-4">
+          <iframe
+            className="w-80 h-80"
+            src="https://lottie.host/embed/3a413810-edc2-47a9-a0d2-8daabf77a5ee/dFb7ldPI3O.json"
+          ></iframe>
+
+          <div className="text-center">
+            <p className="text-lg font-medium">
+              {'"'}
+              {getQuote().text}
+              {'"'}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              - {getQuote().author}
+            </p>
+          </div>
+        </div>
+      </>
+    );
   }
 
   // Helper function to calculate lesson progress based on user's completed sections and lesson sections

@@ -13,7 +13,7 @@ import { getFirestore, collection, addDoc } from "firebase/firestore";
 import { config } from "@/config/firebase";
 import Nav from "@/components/nav";
 
-// Initialize Firebase (make sure to replace with your actual config)
+// Initialize Firebase (make sure to replace with your actual config
 const firebaseConfig = config;
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
