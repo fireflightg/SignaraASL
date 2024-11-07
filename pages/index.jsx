@@ -184,7 +184,7 @@ export default function Component() {
               <br />
               Check out our{" "}
               <Link
-                href="https://github.com/yourusername/your-repo"
+                href="https://github.com/fireflightg/SignaraASL.git"
                 target="_blank"
                 rel="noreferrer"
                 className="underline underline-offset-4"
